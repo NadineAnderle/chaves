@@ -2,7 +2,7 @@
 const redis = require('redis');
 const fs = require('fs');
 
-// let client = redis.createClient(6379, "10.0.0.86", {});
+let client = redis.createClient(6379, "10.0.0.86", {});
 let file = 'json/json.json';
 
 console.time('#forEach');
@@ -12,7 +12,7 @@ chaves = JSON.parse(fs.readFileSync(file));
 
 /*parametros que o usuário deve informar para blocos*/
 let divisor = 10;
-let max = 20;
+let max = 9999999;
 /*parametros que o usuário deve informar para blocos*/
 
 /*parametros para montar os blocos*/
@@ -46,28 +46,26 @@ let dv;
 blocos.forEach(function (bloco) {
     chaves.forEach(function (chave) {
         for (let i = bloco.ini; i <= bloco.fim; i++) {
+
             //normal  
             chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
             chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
             dv = geraDV(chaveaux);
-
-            console.log('NORMAL',chaveaux+dv);
     
-            //    client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
-            //         if(err)console.error(err);
-            //         console.log(ret);
-            //     });
+            client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
+                if (err) console.error(err);
+                // console.log("nromal",ret);
+            });
 
             //contingencia
             chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
             chave.Numero.padStart(9, "0") + '9' + i.toString().padStart(8, "0");
             dv = geraDV(chaveaux);
 
-            console.log('CONTINGENCIA',chaveaux+dv);
-            // client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
-            //     if(err)console.error(err);
-            //     console.log(ret);
-            // });
+            client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
+                if(err)console.error(err);
+                // console.log("contingencia",ret);
+            });
         }
     });
 });
@@ -96,28 +94,4 @@ function geraDV(chave) {
 
 }
 
-
-
-function rabbitMQ(message) {
-
-    console.log(message);
-
-    rabbitmq.on('message', function (channel, message) {
-        console.log(message);
-    });
-
-    rabbitmq.on('error', function (err) {
-        console.error(err);
-    });
-
-    rabbitmq.on('logs', function (print_log) {
-        console.info(print_log);
-    });
-
-    rabbitmq.subscribe('fil2', { type: 'direct' });
-    rabbitmq.publish('fil2', 'message');
-    // rabbitmq.pull('Chaves', 'message');
-
-    //   rabbitmq.unpull('Chaves');
-}
 console.timeEnd('#forEach');    
