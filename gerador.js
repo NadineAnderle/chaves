@@ -1,20 +1,14 @@
-const RabbitMQ = require('rabbitmq-node');
-const redis = require('redis');
 
-let rabbitmq = new RabbitMQ('amqp://localhost');
-let client = redis.createClient(6379, "10.0.0.86", {});
+const redis = require('redis');
+const fs = require('fs');
+
+// let client = redis.createClient(6379, "10.0.0.86", {});
+let file = 'json/json.json';
 
 console.time('#forEach');
 
 let chaves = [];
-chaves.push({
-    UF: 33,
-    Cnpj: '00834279000109',
-    Modelo: 65,
-    Serie: '6',
-    Numero: '50776',
-    ChaveDeAcesso: []
-});
+chaves = JSON.parse(fs.readFileSync(file));
 
 /*parametros que o usuário deve informar para blocos*/
 let divisor = 10;
@@ -53,40 +47,31 @@ blocos.forEach(function (bloco) {
     chaves.forEach(function (chave) {
         for (let i = bloco.ini; i <= bloco.fim; i++) {
             //normal  
-            chaveaux = chave.UF + '1804' + chave.Cnpj.padStart(14, "0") + chave.Modelo + chave.Serie.padStart(3, "0") +
-                chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
+            chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
+            chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
             dv = geraDV(chaveaux);
-            // chave.ChaveDeAcesso.push(chaveaux + dv);
-            client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
-                err =>{
-                    console.error(err);
-                },
-                ret =>{
-                    console.log(ret);
-                }
-            });
+
+            console.log('NORMAL',chaveaux+dv);
+    
+            //    client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
+            //         if(err)console.error(err);
+            //         console.log(ret);
+            //     });
+
             //contingencia
-            chaveaux = chave.UF + '1804' + chave.Cnpj.padStart(14, "0") + chave.Modelo + chave.Serie.padStart(3, "0") +
-                chave.Numero.padStart(9, "0") + '9' + i.toString().padStart(8, "0");
+            chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
+            chave.Numero.padStart(9, "0") + '9' + i.toString().padStart(8, "0");
             dv = geraDV(chaveaux);
-            // chave.ChaveDeAcesso.push(chaveaux + dv);
-            client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
-                err =>{
-                    console.error(err);
-                },
-                ret =>{
-                    console.log(ret);
-                }
-            });
+
+            console.log('CONTINGENCIA',chaveaux+dv);
+            // client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
+            //     if(err)console.error(err);
+            //     console.log(ret);
+            // });
         }
     });
 });
-
-chaves.forEach(function (chave) {
-    rabbitMQ(chave);
-});
 /* monta os cNFs de acordo com a logica de blocos informada*/
-// console.log(chaves);
 
 function geraDV(chave) {
 
@@ -129,7 +114,7 @@ function rabbitMQ(message) {
         console.info(print_log);
     });
 
-    rabbitmq.subscribe('fil2',{type:'direct'});
+    rabbitmq.subscribe('fil2', { type: 'direct' });
     rabbitmq.publish('fil2', 'message');
     // rabbitmq.pull('Chaves', 'message');
 
