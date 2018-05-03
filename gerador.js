@@ -1,8 +1,11 @@
 
 const redis = require('redis');
 const fs = require('fs');
+// const cluster = require('cluster');
 
-let client = redis.createClient(6379, "10.0.0.86", {});
+// const numCPUs = require('os').cpus().length;
+
+let client = redis.createClient(6379, "10.142.0.2", {});
 let file = 'json/json.json';
 
 console.time('#forEach');
@@ -11,8 +14,8 @@ let chaves = [];
 chaves = JSON.parse(fs.readFileSync(file));
 
 /*parametros que o usuário deve informar para blocos*/
-let divisor = 10;
-let max = 20;
+let divisor = 20;
+let max = 9999999;
 /*parametros que o usuário deve informar para blocos*/
 
 /*parametros para montar os blocos*/
@@ -20,13 +23,14 @@ let x = Math.round(max / divisor);
 let m = Math.round(max / 2);
 
 // let bloco = {ini:5000000,fim:5100000};
-let blocos=[];
+let blocos = [];
 let ini = 0;
 let fim = 0;
 /*parametros para montar os blocos*/
 
 /* inicio da geracao dos blocos*/
-for (let j = 1; fim <max; j++) {
+
+for (let j = 1; fim < max; j++) {
     ini = m - (j * x) + 1;
     fim = m - ((j - 1) * x);
     blocos.push({
@@ -42,40 +46,43 @@ for (let j = 1; fim <max; j++) {
 }
 /* fim da geracao dos blocos*/
 
-
-
 /* monta os cNFs de acordo com a logica de blocos informada*/
 let chaveaux;
 let dv;
 
- blocos.forEach(function (bloco) {
-chaves.forEach(function (chave) {
-    for (let i = bloco.ini; i <= bloco.fim; i++) {
-        //normal  
-        chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
-            chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
-        dv = geraDV(chaveaux);
-        // console.log(chaveaux+dv);
-        client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
-            if (err) console.error(err);
-            // console.log("nromal",ret);
-        });
-
-        //contingencia
-        chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
-            chave.Numero.padStart(9, "0") + '9' + i.toString().padStart(8, "0");
-        dv = geraDV(chaveaux);
-
-        client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
-            if (err) console.error(err);
-            // console.log("contingencia",ret);
-        });
-        // console.log(chaveaux+dv);
-    }
-    
-     });
+blocos.forEach(function (bloco) {
+    montaChaves(bloco);
 });
+
 /* monta os cNFs de acordo com a logica de blocos informada*/
+
+function montaChaves(bloco) {
+    chaves.forEach(function (chave) {
+        for (let i = bloco.ini; i <= bloco.fim; i++) {
+            //normal  
+            chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
+                chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
+            dv = geraDV(chaveaux);
+            // console.log(chaveaux + dv);
+            client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
+                if (err) console.error(err);
+                // console.log("nromal",ret);
+            });
+
+            //contingencia
+            chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
+                chave.Numero.padStart(9, "0") + '9' + i.toString().padStart(8, "0");
+            dv = geraDV(chaveaux);
+
+            client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
+                if (err) console.error(err);
+                // console.log("contingencia",ret);
+            });
+            // console.log(chaveaux + dv);
+        }
+
+    });
+}
 
 function geraDV(chave) {
 
