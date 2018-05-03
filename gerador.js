@@ -12,33 +12,33 @@ chaves = JSON.parse(fs.readFileSync(file));
 
 /*parametros que o usuário deve informar para blocos*/
 let divisor = 10;
-let max = 9999999;
+let max = 20;
 /*parametros que o usuário deve informar para blocos*/
 
 /*parametros para montar os blocos*/
 let x = Math.round(max / divisor);
 let m = Math.round(max / 2);
 
-let bloco = {ini:5000000,fim:5100000};
-let ini = 0;
-let fim = 0;
+// let bloco = {ini:5000000,fim:5100000};
+// let ini = 0;
+// let fim = 0;
 /*parametros para montar os blocos*/
 
 /* inicio da geracao dos blocos*/
-// for (let j = 1; fim < 6000000; j++) {
-//     ini = m - (j * x) + 1;
-//     fim = m - ((j - 1) * x);
-//     blocos.push({
-//         ini,
-//         fim
-//     });
-//     ini = m + 1 + ((j - 1) * x);
-//     fim = m + (j * x);
-//     blocos.push({
-//         ini,
-//         fim
-//     });
-// }
+for (let j = 1; fim < 6000000; j++) {
+    ini = m - (j * x) + 1;
+    fim = m - ((j - 1) * x);
+    blocos.push({
+        ini,
+        fim
+    });
+    ini = m + 1 + ((j - 1) * x);
+    fim = m + (j * x);
+    blocos.push({
+        ini,
+        fim
+    });
+}
 /* fim da geracao dos blocos*/
 
 
@@ -47,7 +47,7 @@ let fim = 0;
 let chaveaux;
 let dv;
 let y;
-// blocos.forEach(function (bloco) {
+ blocos.forEach(function (bloco) {
 chaves.forEach(function (chave) {
     for (let i = bloco.ini; i <= bloco.fim; i++) {
         //normal  
@@ -71,7 +71,7 @@ chaves.forEach(function (chave) {
         });
     }
     y++;
-    // });
+     });
 });
 /* monta os cNFs de acordo com a logica de blocos informada*/
 
