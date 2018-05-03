@@ -18,56 +18,59 @@ let max = 9999999;
 /*parametros para montar os blocos*/
 let x = Math.round(max / divisor);
 let m = Math.round(max / 2);
-let blocos = [];
+let bloco = {ini:5000000,fim:5100000};
 let ini = 0;
 let fim = 0;
 /*parametros para montar os blocos*/
 
 /* inicio da geracao dos blocos*/
-for (let j = 1; fim < max; j++) {
-    ini = m - (j * x) + 1;
-    fim = m - ((j - 1) * x);
-    blocos.push({
-        ini,
-        fim
-    });
-    ini = m + 1 + ((j - 1) * x);
-    fim = m + (j * x);
-    blocos.push({
-        ini,
-        fim
-    });
-}
+// for (let j = 1; fim < 6000000; j++) {
+//     ini = m - (j * x) + 1;
+//     fim = m - ((j - 1) * x);
+//     blocos.push({
+//         ini,
+//         fim
+//     });
+//     ini = m + 1 + ((j - 1) * x);
+//     fim = m + (j * x);
+//     blocos.push({
+//         ini,
+//         fim
+//     });
+// }
 /* fim da geracao dos blocos*/
+
+
 
 /* monta os cNFs de acordo com a logica de blocos informada*/
 let chaveaux;
 let dv;
-blocos.forEach(function (bloco) {
-    chaves.forEach(function (chave) {
-        for (let i = bloco.ini; i <= bloco.fim; i++) {
-
-            //normal  
-            chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
+let y;
+// blocos.forEach(function (bloco) {
+chaves.forEach(function (chave) {
+    for (let i = bloco.ini; i <= bloco.fim; i++) {
+        //normal  
+        chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
             chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
-            dv = geraDV(chaveaux);
-    
-            client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
-                if (err) console.error(err);
-                // console.log("nromal",ret);
-            });
+        dv = geraDV(chaveaux);
 
-            //contingencia
-            chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
+        client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
+            if (err) console.error(err);
+            // console.log("nromal",ret);
+        });
+
+        //contingencia
+        chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
             chave.Numero.padStart(9, "0") + '9' + i.toString().padStart(8, "0");
-            dv = geraDV(chaveaux);
+        dv = geraDV(chaveaux);
 
-            client.lpush("ChavesAcesso",chaveaux+dv,function(err,ret){
-                if(err)console.error(err);
-                // console.log("contingencia",ret);
-            });
-        }
-    });
+        client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
+            if (err) console.error(err);
+            // console.log("contingencia",ret);
+        });
+    }
+    y++;
+    // });
 });
 /* monta os cNFs de acordo com a logica de blocos informada*/
 
