@@ -18,6 +18,7 @@ let max = 9999999;
 /*parametros para montar os blocos*/
 let x = Math.round(max / divisor);
 let m = Math.round(max / 2);
+
 let bloco = {ini:5000000,fim:5100000};
 let ini = 0;
 let fim = 0;
