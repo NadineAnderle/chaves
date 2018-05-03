@@ -20,12 +20,13 @@ let x = Math.round(max / divisor);
 let m = Math.round(max / 2);
 
 // let bloco = {ini:5000000,fim:5100000};
-// let ini = 0;
-// let fim = 0;
+let blocos=[];
+let ini = 0;
+let fim = 0;
 /*parametros para montar os blocos*/
 
 /* inicio da geracao dos blocos*/
-for (let j = 1; fim < 6000000; j++) {
+for (let j = 1; fim <max; j++) {
     ini = m - (j * x) + 1;
     fim = m - ((j - 1) * x);
     blocos.push({
@@ -46,7 +47,7 @@ for (let j = 1; fim < 6000000; j++) {
 /* monta os cNFs de acordo com a logica de blocos informada*/
 let chaveaux;
 let dv;
-let y;
+
  blocos.forEach(function (bloco) {
 chaves.forEach(function (chave) {
     for (let i = bloco.ini; i <= bloco.fim; i++) {
@@ -54,7 +55,7 @@ chaves.forEach(function (chave) {
         chaveaux = chave.UF + '1804' + chave.Cnpj + chave.Modelo + chave.Serie.padStart(3, "0") +
             chave.Numero.padStart(9, "0") + '1' + i.toString().padStart(8, "0");
         dv = geraDV(chaveaux);
-
+        // console.log(chaveaux+dv);
         client.lpush("ChavesAcesso", chaveaux + dv, function (err, ret) {
             if (err) console.error(err);
             // console.log("nromal",ret);
@@ -69,8 +70,9 @@ chaves.forEach(function (chave) {
             if (err) console.error(err);
             // console.log("contingencia",ret);
         });
+        // console.log(chaveaux+dv);
     }
-    y++;
+    
      });
 });
 /* monta os cNFs de acordo com a logica de blocos informada*/
