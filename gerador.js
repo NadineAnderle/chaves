@@ -6,8 +6,9 @@ const fs = require('fs');
 // const numCPUs = require('os').cpus().length;
 
 let item = process.argv[2];
+let host = "10.142.0.2";
 
-let client = redis.createClient(6379, "10.142.0.2", {});
+let client = redis.createClient(6379, host, {});
 let file = 'json/json.json';
 
 console.time('#forEach');
@@ -16,12 +17,22 @@ let chaves = [];
 chaves = JSON.parse(fs.readFileSync(file));
 
 // publicar no redis o numero dos documentos
-client.lpush("ChavesNumeracao", chave[item].Numero.toString());
+
+client.lpush("ChavesNumeracao", chaves[item].Numero.toString(), function (err, rply) {
+
+    if (err) {
+
+        client = redis.createClient(6379, host, {});
+
+    }
+
+});
 
 /*parametros que o usuário deve informar para blocos*/
 let divisor = 20;
-let max = 20;
+let max = 9999999;
 /*parametros que o usuário deve informar para blocos*/
+
 
 /*parametros para montar os blocos*/
 let x = Math.round(max / divisor);
@@ -56,8 +67,10 @@ let chaveaux;
 let dv;
 
 blocos.forEach(function (bloco) {
-    montaChaves(chaves[item],bloco);
+    montaChaves(chaves[item], bloco);
 });
+
+
 
 /* monta os cNFs de acordo com a logica de blocos informada*/
 
@@ -69,7 +82,11 @@ function montaChaves(chave, bloco) {
         dv = geraDV(chaveaux);
         // console.log(chaveaux + dv);
         client.lpush("ChavesAcesso:" + chave.Numero, chaveaux + dv, function (err, ret) {
-            if (err) console.error(err);
+            if (err) {
+                client = redis.createClient(6379, host, {});
+                console.error(err);
+
+            }
             // console.log("nromal",ret);
         });
 
@@ -79,7 +96,10 @@ function montaChaves(chave, bloco) {
         dv = geraDV(chaveaux);
 
         client.lpush("ChavesAcesso:" + chave.Numero, chaveaux + dv, function (err, ret) {
-            if (err) console.error(err);
+            if (err) {
+                client = redis.createClient(6379, host, {});
+                console.error(err);
+            }
             // console.log("contingencia",ret);
         });
         // console.log(chaveaux + dv);
