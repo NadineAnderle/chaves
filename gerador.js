@@ -7,7 +7,7 @@ const fs = require('fs');
 
 let item = process.argv[2];
 
-let client = redis.createClient(6379, "10.0.0.86", {});
+let client = redis.createClient(6379, "10.142.0.2", {});
 let file = 'json/json.json';
 
 console.time('#forEach');
@@ -16,9 +16,7 @@ let chaves = [];
 chaves = JSON.parse(fs.readFileSync(file));
 
 // publicar no redis o numero dos documentos
-chaves.forEach(chave => {
-    client.lpush("ChavesNumeracao", chave);
-});
+client.lpush("ChavesNumeracao", chave[item].Numero.toString());
 
 /*parametros que o usuário deve informar para blocos*/
 let divisor = 20;
